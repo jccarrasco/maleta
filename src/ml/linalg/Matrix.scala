@@ -3,6 +3,9 @@ package ml.linalg
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 import scala.collection.immutable.Vector
+import scala.collection.immutable.VectorBuilder
+
+import ml.stats.statsOps._
 
 object Matrix{
   def apply[T: Numeric](r: Int, c: Int)(implicit m: ClassManifest[T]): Matrix[T] = Matrix(r, c);
@@ -44,7 +47,8 @@ class Matrix[T: Numeric: ClassManifest](d: Array[T], r: Int, c: Int) extends Mat
     this(Array.fill[T](r * c)(0.asInstanceOf[T]), r, c);
   }
   
-  def this(v: Vector[T], r: Int, c: Int){
+  // define a fourth constructor that takes  Iterable and diensions.
+  def this(v: Iterable[T], r: Int, c: Int){
     this(v.toArray, r, c);
   }
   
@@ -118,11 +122,59 @@ class Matrix[T: Numeric: ClassManifest](d: Array[T], r: Int, c: Int) extends Mat
   }
   
   // Take rows
-  def takeRow(list: Vector[T]) = {
-    
-  } 
+  /*def takeRow(list: Iterable[Int]): Matrix[T] = {
+    var vector =ArrayBuffer[ArrayBuffer[T]]();
+    for(r <- list){
+      vector = vector :+ data(r);
+    }
+    Matrix[T](list.size, cols);
+  } */
+  
   // Take column
-  // def takeCol(c: Int)
+  def takeCol(c: Int): Vector[T] = {
+    var vector = Vector[T]();
+    for(r <- 0 until rows){
+      vector = vector :+ data(r)(c);
+    }
+    vector;
+  }
+  
+  // Row means
+  def rowMeans(): Vector[Double] = {
+    var mv = Vector[Double]();
+    for(r <- 0 until rows){
+      mv = mv :+ mean[T](takeRow(r));
+    }
+    mv;
+  }
+  
+  // Col means
+  def colMeans(): Vector[Double] = {
+    var mv = Vector[Double]();
+    for(c <- 0 until cols){
+      mv = mv :+ mean[T](takeCol(c));
+    }
+    mv;
+  }
+  
+  
+  // Row sum
+  def rowSums(): Vector[Double] = {
+    var mv = Vector[Double]();
+    for(r <- 0 until rows){
+      mv = mv :+ sum[T](takeRow(r));
+    }
+    mv;
+  }
+  
+  // Col sum
+  def colSums(): Vector[Double] = {
+    var mv = Vector[Double]();
+    for(c <- 0 until cols){
+      mv = mv :+ sum[T](takeCol(c));
+    }
+    mv;
+  }
   
   //Create a Matrix (list of lists)
   def apply(rc: (Int, Int)): T = {

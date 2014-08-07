@@ -4,26 +4,18 @@ import ml.linalg.Matrix
 import ml.linalg.Ones
 import ml.linalg.Identity
 import ml.linalg.Zeros
+import ml.models.KMeansModel
+import ml.metrics.distance._
+import ml.cluster.Kmeans
+import ml.linalg.Table._
 
 object test {
 	def main(args: Array[String]){
-	  
-	  //val m1 = new Matrix[Double](4);
 
-	  val m3 = new Matrix[Int](Array(1,2,333,4,5,6,7,9999,9),3,3 );
-	  val m4 = new Matrix[Int](Range(1,17).toArray,4,4);
-	  val m5 = new Ones[Float](2, 2);
-	  val m6 = new Identity[Int](8);
-	  val m7 = new Zeros[Int](2,2);
+	  val m3 = new Matrix[Int](Array(1,2,3,1,2,3,5,9,0),3,3 );
 	  
-	  println(m4);
-	  m4.takeRow(1).foreach(println);
-	  println(m3);
-	  println(m3((1,1)));
-	  m3((1,1)) = 8;
-	  m3((2,2)) = 10;
-	  println(m3);
-	  println(m6);
-	  
+	  val kmobj = new Kmeans(m3, 2);
+	  println(kmobj.run.clusters);
+	  println(table(Vector("a",3,4,5022,3,3,4,"a",1,6,428,9)))
 	}
 }

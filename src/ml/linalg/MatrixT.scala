@@ -2,7 +2,7 @@ package ml.linalg
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
-import ml.util.MatrixFormat
+import ml.util.MatrixFormat._
 
 trait MatrixT[@specialized T]{
   var rows: Int;
@@ -22,7 +22,7 @@ trait MatrixT[@specialized T]{
   override def toString = {
     // Obtain max width to be considered
     val mtoA = data.flatten;
-    val max =  MatrixFormat.maxWidth(mtoA);
+    val max =  maxWidth(mtoA);
     
     val rv = new scala.StringBuilder;
     for(r <- 0 until rows; c <- 0 until cols){
