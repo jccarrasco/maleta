@@ -1,5 +1,7 @@
 package ml.linalg
 
+import ml.traits.MatrixT
+
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 import scala.collection.immutable.Vector

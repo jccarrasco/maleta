@@ -1,6 +1,7 @@
 package ml.linalg
 
 import scala.collection.mutable.ArrayBuffer
+import ml.traits.MatrixT
 
 class Identity[T: Numeric: ClassManifest](n: Int) extends MatrixT[T]{
 	var rows: Int = n;
