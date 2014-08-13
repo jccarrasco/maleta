@@ -1,56 +1,65 @@
 package ml.cluster
 
 import scala.collection.mutable.ArrayBuffer
-
 import ml.linalg.Matrix
 import ml.models.KMeansModel
 import ml.stats.statsOps._
 import ml.metrics.distance._
+import ml.util.TypeConversions._
 
-class Kmeans[T: Numeric: ClassManifest] private(
-		private var m: Matrix[T],
-		private var k: Int,
-		private var maxIters: Int,
-		private var epsilon: Double
-		){
-	
-	require(maxIters > 0);
+object Kmeans {
+  
+  def apply[T: Numeric: ClassManifest] (
+		m: Matrix[T],
+		k: Int,
+		maxIters: Int = 10,
+		epsilon: Double = 1e-4,
+		distMethod: String = "euclidean",
+		p: Int = 2
+		): KMeansModel[T] = {
+    require(maxIters > 0);
 	require(k > 0);
+    
+	run(m,k,maxIters,epsilon,distMethod,p);
+  }
 	
-	def this(data: Matrix[T], k: Int) = {
-	  this(data, k, 10, 1e-4);
-	}
-	
-	def run(): KMeansModel[Double] = {
+	def run[T: Numeric: ClassManifest, num: Numeric](
+		m: Matrix[T],
+		k: Int,
+		maxIters: Int,
+		epsilon: Double,
+		distMethod: String = "euclidean",
+		p: Int = 2
+		): KMeansModel[T] = {
 	  // generate k random sets of integers to be used as centers
 	  var centers = new Array[Array[Double]](k);
-	  for (kval <- 0 until k){
-	    centers(k) = randomWithin(m.data.toArray.flatten.asInstanceOf[Vector[Double]], m.cols);
+	  val allData = m.data.flatten
+	  for (kv <- 0 until k){
+	    
+	    centers(kv) = randomWithin(allData, m.cols).toArray;
 	  }
 	  
 	  // Find the distance between each data point and all the centers
 	  var clusters = new Array[Int](m.rows);
 	  
-	  for(r <- 0 until m.rows; c <- 1 until k){
-	    var maxVal = dist[Double](m.data(r).toArray.asInstanceOf[Array[Double]], centers(0));
-	    var max = 0;
-	    
-	    clusters(r) = {
-	      var tempNew = dist[Double](m.data(r).toArray.asInstanceOf[Array[Double]], centers(c));
-	      if(tempNew > maxVal){
-	        maxVal = tempNew;
-	        max = c;
-	      }
-	      max;
+	  for(r <- 0 until m.rows){
+	      clusters(r) = {
+	        var minDist = dist[Double](TtoDouble(m(r)), centers(0), distMethod);
+	        var min = 0;
+	        for(c <- 1 until k){
+	        	var tempNew = dist[Double](TtoDouble(m(r)), centers(c), distMethod);
+	        	if(tempNew < minDist){
+	        		minDist = tempNew;
+	        		min = c;
+	        	}
+	        	
+	        }
+	        min;
 	    }
+	    
 	  }
 	  
 	  val size = clusters.distinct.map(x => (x, clusters.count(_ == x)) ) 
-	  new KMeansModel(Vector.empty ++ clusters, centers, size)
-	}
-	
-	// Run the algorithm here and return a KMeansModel
-	def apply(): KMeansModel[Double] = {
-	  run();
+	  new KMeansModel(clusters.toVector, centers, size.toVector, k, maxIters,epsilon, distMethod,p)
 	}
 }

@@ -10,15 +10,16 @@ import scala.collection.immutable.VectorBuilder
 import ml.stats.statsOps._
 
 object Matrix{
-  def apply[T: Numeric](r: Int, c: Int)(implicit m: ClassManifest[T]): Matrix[T] = Matrix(r, c);
+  def apply[T: Numeric](r: Int, c: Int)(implicit m: ClassManifest[T]): Matrix[T] = new Matrix(r, c);
   def apply[T: Numeric](r: Int, c: Int, rand: Random)(implicit m: ClassManifest[T]): Matrix[Int] =
     new Matrix(Array.fill[Int](r * c)(rand.nextInt()), r, c);
   
   def apply[T](value: T) = value;
+  
+  def apply[T: Numeric](d: Array[T], r: Int, c: Int)(implicit m: ClassManifest[T]): Matrix[T] = new Matrix(d, r,c);
 }
 
 class Matrix[T: Numeric: ClassManifest](d: Array[T], r: Int, c: Int) extends MatrixT[T]{
-
   var rows: Int = r;
   var cols: Int = c;
   var data = {
@@ -28,7 +29,7 @@ class Matrix[T: Numeric: ClassManifest](d: Array[T], r: Int, c: Int) extends Mat
       }
       
       // Create an array of arrays
-      var m = ArrayBuffer.fill(rows, cols)(0.asInstanceOf[T]);
+      var m = ArrayBuffer.fill(rows, cols)(implicitly[Numeric[T]].fromInt(0));
       var init = 0;
       
       for( r <- 0 until rows; c <- 0 until cols){
@@ -40,13 +41,13 @@ class Matrix[T: Numeric: ClassManifest](d: Array[T], r: Int, c: Int) extends Mat
   }; 
   
   // define a secondary constructor that takes only one argument
-  def this(n: Int) = {
-    this(Array.fill[T](n * n)(0.asInstanceOf[T]), n, n);
-  }
+  /*def this(n: Int) = {
+    this(Array.fill[T](n * n)(implicitly[Numeric[T]].fromInt(0)), n, n);
+  }*/
   
   // define a third constructor that takes number of rows and columns
   def this(r: Int, c: Int){
-    this(Array.fill[T](r * c)(0.asInstanceOf[T]), r, c);
+    this(Array.fill[T](r * c)(implicitly[Numeric[T]].fromInt(0)), r, c);
   }
   
   // define a fourth constructor that takes  Iterable and diensions.
@@ -124,13 +125,18 @@ class Matrix[T: Numeric: ClassManifest](d: Array[T], r: Int, c: Int) extends Mat
   }
   
   // Take rows
-  /*def takeRow(list: Iterable[Int]): Matrix[T] = {
+  def takeRow(list: Iterable[Int]): Matrix[T] = {
     var vector =ArrayBuffer[ArrayBuffer[T]]();
     for(r <- list){
       vector = vector :+ data(r);
     }
-    Matrix[T](list.size, cols);
-  } */
+    val rowMat = Matrix[T](list.size, cols);
+    rowMat.data = vector;
+    
+    rowMat;
+  } 
+  
+  // Convert ArrayBuffer[ArrayBuffer]] to Matrix
   
   // Take column
   def takeCol(c: Int): Vector[T] = {
@@ -183,4 +189,6 @@ class Matrix[T: Numeric: ClassManifest](d: Array[T], r: Int, c: Int) extends Mat
     data(rc._1)(rc._2);
   }
   
+  def apply(): ArrayBuffer[ArrayBuffer[T]] = data
+  def apply(r: Int) = data(r).toVector
 }

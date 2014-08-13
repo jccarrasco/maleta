@@ -1,20 +1,11 @@
 package ml.models
 
-import ml.linalg.Table._
 import ml.traits.ModelT
+import ml.linalg.Table._
 
-
-/**
- * A Kmeans Model Object that contains information about a particular model
- * 
- * @constructor create a new model with clusters, centers, withinss, betweeness, and size
- * @param clusters vector containing the cluster to which each element belongs
- * @param centers vector containing the center of each cluster found
- * @param size vector of size of each cluster
- */
-class KMeansModel[T: Numeric: ClassManifest](
+class KMedoidsModel[T: Numeric: ClassManifest](
     val clusters: Vector[Int], 
-    val centers: Array[Array[Double]], 
+    val centers: Array[Array[T]], 
     val size: Vector[(Int,Int)],
     val k: Int,
     val maxIters: Int,
@@ -26,7 +17,7 @@ class KMeansModel[T: Numeric: ClassManifest](
   override def toString = {
     val rv = new scala.StringBuilder;
     
-    rv.append("\n KMeans---\n");
+    rv.append("\n KMedoids---\n");
     rv.append("K: "+k);
     rv.append("\nmaxIters: "+ maxIters);
     rv.append("\nepsilon: " +epsilon);
